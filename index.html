@@ -34,10 +34,10 @@
 
 </head>
 
-<body>
+<body ng-app="">
 
-    <div ng-app="" ng-include="'header.html'">
-    </div>
+    <div ng-include="'header.html'"></div>
+
     <div class="container">
 
         <div class="row">
@@ -77,9 +77,9 @@
                     </h2>
                     <h1 class="brand-name">Island Vibes Kitchen</h1>
                     <hr class="tagline-divider">
-                    <h2>We
+                    <h2>
                         <small>
-                            <strong>Provide Authentic Caribbean Foods</strong>
+                            <strong>Provide Tasty Authentic Caribbean Foods</strong>
                         </small>
                     </h2>
                 </div>
@@ -120,14 +120,7 @@
     </div>
     <!-- /.container -->
 
-    <footer>
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-12 text-center">
-                    <p>Copyright &copy; Your Website 2014</p>
-                </div>
-            </div>
-        </div>
+    <footer ng-include="'footer.html'">
     </footer>
 
     <!-- jQuery Version 1.11.0 -->
