@@ -15,10 +15,10 @@
     <link href="css/bootstrap.min.css" rel="stylesheet">
 
     <!-- AngularJs -->
-    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.26/angular.min.js"></script>
+    <!--script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.26/angular.min.js"></script-->
 
     <!-- Custom CSS -->
-    <link href="css/business-casual.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
 
     <!-- Fonts -->
     <link href="http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css">
@@ -36,7 +36,7 @@
 
 <body ng-app="">
 
-    <div ng-include="'header.html'"></div>
+    <div id="top" ng-include="'header.html'"></div>
 
     <div class="container">
 
@@ -55,12 +55,36 @@
                         <div class="carousel-inner">
                             <div class="item active">
                                 <img class="img-responsive img-full" src="img/slide-1.jpg" alt="">
+                                <div class="container">
+                                    <div class="carousel-caption">
+                                        <h1>Catering</h1>
+                                        <p>Having a Party or a special Occasion. Give us a call</p>
+                                        <p><a class="btn btn-lg btn-primary" href="#" role="button">Contact Us</a>
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
                             <div class="item">
                                 <img class="img-responsive img-full" src="img/slide-2.jpg" alt="">
+                                <div class="container">
+                                    <div class="carousel-caption">
+                                        <h1>Take out</h1>
+                                        <p>Order Online and we deliver anywhere in Altanta.</p>
+                                        <p><a class="btn btn-lg btn-primary" href="#" role="button">Sign up today</a>
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
                             <div class="item">
                                 <img class="img-responsive img-full" src="img/slide-3.jpg" alt="">
+                                <div class="container">
+                                    <div class="carousel-caption">
+                                        <h1>Dining</h1>
+                                        <p>Come by and Relax at our Place. Listen to Reggae and Calyso</p>
+                                        <p><a class="btn btn-lg btn-primary" href="#" role="button">Get our Location</a>
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -134,6 +158,26 @@
         $('.carousel').carousel({
             interval: 5000 //changes the speed
         })
+    </script>
+
+    <script>
+        $(document).ready(function () {
+
+            //$(".top1").load("top.html");
+
+            $("#top").load("header.html", function () {
+                $(this).find(".container a[href$='" + getPageName() + "']").parent().addClass("active");
+            })
+
+
+            $("footer").load("footer.html");
+
+            function getPageName() {
+                var url = window.location.pathname;
+                var index = url.lastIndexOf(" / ") + 2;
+                return url.substr(index);
+            }
+        });
     </script>
 
 </body>

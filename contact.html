@@ -15,10 +15,10 @@
     <link href="css/bootstrap.min.css" rel="stylesheet">
 
     <!-- AngularJs -->
-    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.26/angular.min.js"></script>
+    <!--script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.26/angular.min.js"></script-->
 
     <!-- Custom CSS -->
-    <link href="css/business-casual.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
 
     <!-- Fonts -->
     <link href="http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css">
@@ -36,7 +36,7 @@
 
 <body ng-app="">
 
-    <div ng-include="'header.html'"></div>
+    <div id="top" ng-include="'header.html'"></div>
 
     <div class="container">
 
@@ -44,27 +44,29 @@
             <div class="box">
                 <div class="col-lg-12">
                     <hr>
-                    <h2 class="intro-text text-center">Contact
-                        <strong>business casual</strong>
-                    </h2>
-                    <hr>
+
+
+                    <h2 class="intro-text text-center">Contact <strong>Island Vibes Kitchen</strong></h2>
+                    <hr />
                 </div>
                 <div class="col-md-8">
                     <!-- Embedded Google Map using an iframe - to select your location find it on Google maps and paste the link as the iframe src. If you want to use the Google Maps API instead then have at it! -->
-                    <iframe width="100%" height="400" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="http://maps.google.com/maps?hl=en&amp;ie=UTF8&amp;ll=37.0625,-95.677068&amp;spn=56.506174,79.013672&amp;t=m&amp;z=4&amp;output=embed"></iframe>
+                    <iframe style="border: 0;" src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d3321.812793921461!2d-84.0202482!3d33.636095700000006!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x88f44ca6c533cc3b%3A0xb51a36fe56ed8d0f!2s1955+Hwy+138+SE+%231000%2C+Conyers%2C+GA+30013%2C+USA!5e0!3m2!1sen!2sjm!4v1415869237116" width="700" height="600" frameborder="0"></iframe>
                 </div>
                 <div class="col-md-4">
-                    <p>Phone:
-                        <strong>123.456.7890</strong>
+                    <p>Phone: <strong>404.287.3852</strong>
                     </p>
-                    <p>Email:
-                        <strong><a href="mailto:name@example.com">name@example.com</a></strong>
+                    <p>Email: <strong><a href="mailto:info@islandvibeskitchen.com">info@islandvibeskitchen.com</a></strong>
                     </p>
-                    <p>Address:
-                        <strong>3481 Melrose Place
-                            <br>Beverly Hills, CA 90210</strong>
+                    <p>Address1: <strong>1955 Hwy 138 SE #1000,</strong>
+                    </p>
+                    <p>Address2: <strong>Conyers, Georgia 30013</strong>
                     </p>
                 </div>
+
+
+
+
                 <div class="clearfix"></div>
             </div>
         </div>
@@ -118,6 +120,26 @@
 
     <!-- Bootstrap Core JavaScript -->
     <script src="js/bootstrap.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+
+            //$(".top1").load("top.html");
+
+            $("#top").load("header.html", function () {
+                $(this).find(".container a[href$='" + getPageName() + "']").parent().addClass("active");
+            })
+
+
+            $("footer").load("footer.html");
+
+            function getPageName() {
+                var url = window.location.pathname;
+                var index = url.lastIndexOf(" / ") + 2;
+                return url.substr(index);
+            }
+        });
+    </script>
 
 </body>
 
