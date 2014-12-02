@@ -14,6 +14,10 @@
     <!-- Bootstrap Core CSS -->
     <link href="css/bootstrap.min.css" rel="stylesheet">
 
+    <link href="css/bootstrap-theme.css" rel="stylesheet" />
+    <link href="css/bootstrap-datepicker3.css" rel="stylesheet" />
+
+
     <!-- AngularJs -->
     <!--script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.26/angular.min.js"></script-->
 
@@ -42,46 +46,29 @@
 
         <div class="row">
             <div class="box">
-                <div class="col-lg-12">
-                    <hr>
-                    <h2 class="intro-text text-center">Today
-                        <strong>Menu</strong>
-                    </h2>
-                    <hr>
+
+
+
+                <div class="col-md-2">
+                    <div id="date"></div>
                 </div>
-                <div class="col-md-12">
-                    <p>Whether breakfast, Lunch and Dinner</p>
+                <div class="col-md-8">
+                    <h2 id="dateheader" class="text-center"></h2> 
+                    <div id="menu_header" class="text-center">
+                        <ul class="pagination"></ul>
+                    </div>
+                    <div id="menu_container" class="text-center">
+                    </div>
                 </div>
+
+
+
+
                 <div class="clearfix"></div>
             </div>
         </div>
 
-        <div class="row">
-            <div class="box">
-                <div class="col-md-4">
-                    <h3>
-                        <small>Breakfast</small>
-                    </h3> 
-                    <hr class="visible-xs">
-                    <div id="breakfast"></div>
-                </div>
-                <div class="col-md-4">
-                    <h3>
-                        <small>Lunch</small>
-                    </h3> 
-                    <hr class="visible-xs">
-                    <div id="lunch"></div>
-                </div>
-                <div class="col-md-4">
-                    <h3>
-                        <small>Dinner</small>
-                    </h3> 
-                    <hr class="visible-xs">
-                    <div id="dinner"></div>
-                </div>
-                <div class="clearfix"></div>
-            </div>
-        </div>
+
 
     </div>
     <!-- /.container -->
@@ -89,13 +76,17 @@
     <footer ng-include="'footer.html'">
     </footer>
 
-    <!-- jQuery Version 1.11.0 -->
-    <script src="js/jquery-1.11.0.js"></script>
+    <!-- jQuery Version 2.1.1 -->
+    <script src="js/jquery-2.1.1.min.js"></script>
 
     <!-- Bootstrap Core JavaScript -->
     <script src="js/bootstrap.min.js"></script>
 
-    <script>
+    <script type="text/javascript" src="js/bootstrap-datepicker.js"></script>
+    <script src="https://sdk.amazonaws.com/js/aws-sdk-2.0.29.min.js"></script>
+
+
+    <script type="text/javascript">
         $(document).ready(function () {
 
             //$(".top1").load("top.html");
@@ -112,6 +103,195 @@
                 var index = url.lastIndexOf(" / ") + 2;
                 return url.substr(index);
             }
+
+            var webservice_hash_key = '723d2ab2-2b77-48de-baee-b8fc462ec829';
+            var courses = JSON.parse('["AmuseBouche","Appetizer","Salad","Soup","Entrée","Dessert","Beverage"]');
+            var occasions = JSON.parse('["breakfast","lunch","dinner","special"]');
+            var cuisines = JSON.parse('["American","Jamaican","Indian","Vegetarian","Chinese"]');
+            var defaultOccasion = 'lunch';
+
+
+            AWS.config.update({
+                accessKeyId: 'AKIAJZPJQ5362E6XQC5A',
+                secretAccessKey: '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'
+            });
+
+            var dynamodb = new AWS.DynamoDB({
+                region: 'us-east-1'
+            });
+
+            $('#date').datepicker({
+                format: "yyyy-mm-dd",
+                todayBtn: "linked"
+            }).on('changeDate', function (e) {
+                var date = $(this).datepicker('getDate');
+                var dateProper = formatDate(date);
+                getMenuData(dateProper);
+                var today = formatDate(new Date());
+                $("#dateheader").html("Menu <small>" + (dateProper == today ? "Today" : dateProper) + "</small>");
+            });
+
+            initDates();
+
+            function getMenuData(xdate) {
+                var params = {
+                    TableName: 'RestaurantMenu',
+                    IndexName: 'webservice_key-dateServing-index',
+                    KeyConditions: {
+                        "webservice_key": {
+                            "AttributeValueList": [
+                                {
+                                    "S": webservice_hash_key
+                        }
+                        ],
+                            "ComparisonOperator": "EQ"
+                        },
+                        "dateServing": {
+                            "AttributeValueList": [
+                                {
+                                    "S": xdate
+                        }
+                        ],
+                            "ComparisonOperator": "GE"
+                        }
+                    },
+                };
+
+                dynamodb.query(params, function (err, data) {
+                    if (err) {
+                        alert(err);
+                    } else {
+                        layoutMenu(data.Items);
+                        showOccassion(defaultOccasion);
+                    }
+                });
+            }
+
+
+            $("#menu_header ul.pagination").on('click', '.btn_occasion a', function (e) {
+                e.preventDefault();
+                var obj = $(this).parent();
+                showOccassion(obj.attr('id'));
+            })
+
+            function getValue(x) {
+                if (x["S"] != null) {
+                    return x["S"];
+                }
+
+                if (x["N"] != null) {
+                    return x["N"];
+                }
+                return null;
+
+            }
+
+            function layoutMenu(items) {
+                $("#menu_header ul.pagination").empty();
+                $.each(occasions, function (key, xOccasion) {
+                    $('<li/>').appendTo($("#menu_header ul.pagination")).addClass("btn_occasion").attr("id", xOccasion).html('<a href="#">' + xOccasion + '</a>');
+                });
+                $("#menu_container").empty();
+                $.each(occasions, function (key, xOccasion) {
+                    $('<div/>').appendTo($("#menu_container")).addClass("display_occasion text-center").attr("id", xOccasion);
+                    $('<h3/>').appendTo($("#menu_container div.display_occasion#" + xOccasion)).addClass("text-center").text(xOccasion);
+                    $.each(courses, function (key, course) {
+                        var CourseJustIn = true;
+                        $.each(items, function (key, value) {
+                            var id = getValue(value["id"]);
+                            var webservice_key = getValue(value["webservice_key"]);
+                            var websiteId = getValue(value["websiteId"]);
+                            var dateServing = getValue(value["dateServing"]);
+                            var mealId = getValue(value["mealId"]);
+                            var meal_name = getValue(value["meal_name"]);
+                            var meal_description = getValue(value["meal_description"]);
+                            var meal_photoLink = getValue(value["meal_photoLink"]);
+                            var meal_course = getValue(value["meal_course"]);
+                            var meal_cuisineType = getValue(value["meal_cuisineType"]);
+                            var occasion = getValue(value["occasion"]);
+                            var price = getValue(value["price"]);
+                            if (xOccasion == occasion) {
+                                if (meal_course == course) {
+                                    if (CourseJustIn) {
+                                        CourseJustIn = false;
+                                        $('<h4/>').appendTo($("#menu_container div.display_occasion#" + xOccasion)).addClass("text-center").text(course);
+                                    }
+                                    $('<p/>').appendTo($("#menu_container div.display_occasion#" + xOccasion)).addClass("text-center").html("<strong>" + meal_name + "</strong>");
+                                    $('<p/>').appendTo($("#menu_container div.display_occasion#" + xOccasion)).addClass("text-center").html("<i>" + meal_cuisineType + "</i>");
+                                    $('<p/>').appendTo($("#menu_container div.display_occasion#" + xOccasion)).addClass("text-center").html(meal_description);
+                                    $('<p/>').appendTo($("#menu_container div.display_occasion#" + xOccasion)).addClass("text-center").html("<mark>" + formatMoney(price) + "</mark>");
+
+                                }
+
+                            }
+
+                        });
+                    });
+                });
+            }
+
+
+            function showOccassion(id) {
+                //remove active on all other buttons
+                $("#menu_header ul.pagination li.btn_occasion").removeClass("active");
+                //active button
+                $("#menu_header ul.pagination li.btn_occasion#" + id).addClass("active");
+                //hide all occasions
+                $("#menu_container div.display_occasion").hide();
+                //show particular occasion
+                $("#menu_container div.display_occasion#" + id).show();
+            }
+
+            function formatDate(xdate) {
+                var dd = xdate.getDate();
+                var mm = xdate.getMonth() + 1; //January is 0!
+                var yyyy = xdate.getFullYear();
+                if (dd < 10) {
+                    dd = '0' + dd
+                }
+                if (mm < 10) {
+                    mm = '0' + mm
+                }
+                return yyyy + "-" + mm + '-' + dd;
+            }
+
+            function initDates() {
+                var xdate = new Date();
+                var today = formatDate(xdate);
+                xdate.setDate(xdate.getDate() - 7);
+                $('#date').datepicker('setStartDate', formatDate(xdate));
+                xdate.setDate(xdate.getDate() + 30);
+                $('#date').datepicker('setEndDate', formatDate(xdate));
+                $('#date').datepicker('setDate', today);
+            }
+
+            var formatMoney = function (num) {
+                var str = num.toString().replace("$", ""),
+                    parts = false,
+                    output = [],
+                    i = 1,
+                    formatted = null;
+                if (str.indexOf(".") > 0) {
+                    parts = str.split(".");
+                    str = parts[0];
+                }
+                str = str.split("").reverse();
+                for (var j = 0, len = str.length; j < len; j++) {
+                    if (str[j] != ",") {
+                        output.push(str[j]);
+                        if (i % 3 == 0 && j < (len - 1)) {
+                            output.push(",");
+                        }
+                        i++;
+                    }
+                }
+                formatted = output.reverse().join("");
+                return ("$" + formatted + ((parts) ? "." + parts[1].substr(0, 2) : ""));
+            };
+
+
+
+
         });
     </script>
 
